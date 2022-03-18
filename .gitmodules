@@ -1,0 +1,6 @@
+[submodule "backend/captini-django-backend"]
+	path = backend/captini-django-backend
+	url = https://github.com/captini-org/captini-django-backend
+[submodule "modules/pronunciation/compare-speech"]
+	path = modules/pronunciation/compare-speech
+	url = https://github.com/catiR/compare-speech

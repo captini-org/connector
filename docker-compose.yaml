@@ -1,0 +1,16 @@
+version: "3.2"
+
+services:
+  rabbitmq:
+    image: rabbitmq:3.9.13
+    network_mode: host
+
+  backend:
+    build:
+      context: backend
+    network_mode: host
+
+  module-pronuncuation:
+    build:
+      context: modules/pronunciation
+    network_mode: host
