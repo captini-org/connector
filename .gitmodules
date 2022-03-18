@@ -4,3 +4,6 @@
 [submodule "modules/pronunciation/compare-speech"]
 	path = modules/pronunciation/compare-speech
 	url = https://github.com/catiR/compare-speech
+[submodule "modules/pronunciation/pronunciation-score-nbtale"]
+	path = modules/pronunciation/pronunciation-score-nbtale
+	url = https://github.com/captini-org/pronunciation-score-nbtale
