@@ -7,3 +7,6 @@
 [submodule "modules/pronunciation/pronunciation-score-nbtale"]
 	path = modules/pronunciation/pronunciation-score-nbtale
 	url = https://github.com/captini-org/pronunciation-score-nbtale
+[submodule "modules/pronunciation/pronunciation-score-icelandic"]
+	path = modules/pronunciation/pronunciation-score-icelandic
+	url = https://github.com/captini-org/pronunciation-score-icelandic
