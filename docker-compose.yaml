@@ -1,5 +1,10 @@
 version: "3.2"
 
+volumes:
+  db-data:
+  pronunciation-cache:
+  wavs:
+
 services:
   rabbitmq:
     image: rabbitmq:3.9.13
@@ -10,7 +15,18 @@ services:
       context: backend
     network_mode: host
 
-  module-pronuncuation:
+  module-pronunciation:
     build:
-      context: modules/pronunciation
-    network_mode: host
+      context: modules/pronunciation/pronunciation-score-icelandic
+      dockerfile: ../Dockerfile
+    command:
+      - --wav-dir=/wavs/
+    volumes:
+      - pronunciation-cache:/cache
+      - wavs:/wavs
+    restart: on-failure
+
+  module-scoring:
+    build:
+      context: modules/scoring
+    restart: on-failure
