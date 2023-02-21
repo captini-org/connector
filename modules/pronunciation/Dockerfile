@@ -21,4 +21,4 @@ RUN micromamba env create -f environment.yml -n captini -c conda-forge
 
 COPY . .
 ENV TRANSFORMERS_CACHE=/cache
-ENTRYPOINT ["bash", "-c", "micromamba activate captini && python connector.py"]
+ENTRYPOINT ["bash", "-c", "micromamba run -n captini python connector.py"]
