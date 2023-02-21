@@ -4,19 +4,67 @@ volumes:
   db-data:
   pronunciation-cache:
   wavs:
+  letsencrypt:
 
 services:
+  traefik:
+    image: traefik:v2.9
+    ports:
+      - 8080:8080
+      - 80:80
+      - 443:443
+    volumes:
+      - letsencrypt:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.tlsresolver.acme.httpchallenge=true"
+      - "--certificatesresolvers.tlsresolver.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.tlsresolver.acme.email=tiro@tiro.is"
+      - "--certificatesresolvers.tlsresolver.acme.storage=/letsencrypt/acme.json"
+
   rabbitmq:
     image: rabbitmq:3.9.13-management
     ports:
       - 15672:15672
     restart: on-failure
 
+  db:
+    image: postgres:14.3
+    # ports:
+    #   - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: django
+      POSTGRES_USER: django
+      POSTGRES_DB: captini
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    restart: on-failure
 
   backend:
     build:
-      context: backend
-    network_mode: host
+      context: backend/captini-django-backend
+    # ports:
+    #   - 8081:8000
+    environment:
+      SECRET_KEY: "kxasASLsakflsaF#43"
+      DATABASE_NAME: captini
+      DATABASE_USER: django
+      DATABASE_HOST: db
+      DATABASE_PASSWORD: django
+      EMAIL_HOST_PASSWORD: "..."
+    volumes:
+      - wavs:/app/recordings
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`captini.tullius.dev`)"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.routers.backend.tls.certresolver=tlsresolver"
+    restart: on-failure
 
   module-pronunciation:
     build:
