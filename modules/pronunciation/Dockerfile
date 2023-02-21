@@ -2,13 +2,10 @@ FROM debian:11
 
 ENV PATH="/root/miniconda3/bin:$PATH"
 
-RUN apt-get update -yqq && apt-get install -y wget && rm -rf /var/lib/apt/lists/*
+RUN apt-get update -yqq && apt-get install -y curl bzip2 && rm -rf /var/lib/apt/lists/*
 
-RUN wget \
-    https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
-    && mkdir /root/.conda \
-    && bash Miniconda3-latest-Linux-x86_64.sh -b \
-    && rm -f Miniconda3-latest-Linux-x86_64.sh
+RUN curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xvj bin/micromamba \
+    && cp bin/micromamba /usr/bin/
 
 # RUN conda create -y -c conda-forge --name captini \
 #     python=3.10 \
@@ -20,8 +17,8 @@ RUN wget \
 
 WORKDIR /app
 COPY environment.yml environment.yml
-RUN conda env create -f environment.yml -n captini
+RUN micromamba env create -f environment.yml -n captini -c conda-forge
 
 COPY . .
 ENV TRANSFORMERS_CACHE=/cache
-ENTRYPOINT ["bash", "-c", ". activate captini && python connector.py"]
+ENTRYPOINT ["bash", "-c", "micromamba activate captini && python connector.py"]
