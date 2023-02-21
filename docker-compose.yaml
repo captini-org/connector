@@ -56,7 +56,7 @@ services:
       DATABASE_USER: django
       DATABASE_HOST: db
       DATABASE_PASSWORD: django
-      EMAIL_HOST_PASSWORD: "..."
+      EMAIL_HOST_PASSWORD: "${EMAIL_HOST_PASSWORD}"
     volumes:
       - wavs:/app/recordings
     labels:
