@@ -35,8 +35,8 @@ services:
 
   db:
     image: postgres:14.3
-    # ports:
-    #   - 5432:5432
+    ports:
+      - 5432:5432
     environment:
       POSTGRES_PASSWORD: django
       POSTGRES_USER: django
@@ -48,8 +48,8 @@ services:
   backend:
     build:
       context: backend/captini-django-backend
-    # ports:
-    #   - 8081:8000
+    ports:
+      - 8083:8000
     environment:
       SECRET_KEY: "kxasASLsakflsaF#43"
       DATABASE_NAME: captini
