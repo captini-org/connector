@@ -45,6 +45,21 @@ services:
       - db-data:/var/lib/postgresql/data
     restart: on-failure
 
+  frontend:
+    build:
+      context: frontend/captini-angular-frontend/frontEndCaptini
+      dockerfile: ../../Dockerfile
+      args:
+        ROOT_URL: ${ROOT_URL}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls.certresolver=tlsresolver"
+      - "traefik.http.routers.frontend-dev.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.frontend-dev.entrypoints=web"
+    restart: on-failure
+
   backend:
     build:
       context: backend/captini-django-backend
