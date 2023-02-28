@@ -10,9 +10,9 @@ services:
   traefik:
     image: traefik:v2.9
     ports:
-      - 8080:8080
-      - 80:80
-      - 443:443
+      - 28080:8080
+      - ${HTTP_PORT}:80
+      - ${HTTPS_PORT}:443
     volumes:
       - letsencrypt:/letsencrypt
       - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -66,7 +66,7 @@ services:
     ports:
       - 8083:8000
     environment:
-      SECRET_KEY: "kxasASLsakflsaF#43"
+      SECRET_KEY: "${BACKEND_SECRET_KEY}"
       DATABASE_NAME: captini
       DATABASE_USER: django
       DATABASE_HOST: db
@@ -76,9 +76,11 @@ services:
       - wavs:/app/recordings
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=Host(`captini.tullius.dev`)"
+      - "traefik.http.routers.backend.rule=PathPrefix(`/captini/`, `/admin/`, `/account/`, `/recordings/`)"
       - "traefik.http.routers.backend.entrypoints=websecure"
       - "traefik.http.routers.backend.tls.certresolver=tlsresolver"
+      - "traefik.http.routers.backend-dev.rule=PathPrefix(`/captini/`, `/admin/`, `/account/`, `/recordings/`)"
+      - "traefik.http.routers.backend-dev.entrypoints=web"
     restart: on-failure
 
   module-pronunciation:
