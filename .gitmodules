@@ -4,3 +4,6 @@
 [submodule "modules/pronunciation/pronunciation-score-icelandic"]
 	path = modules/pronunciation/pronunciation-score-icelandic
 	url = https://github.com/captini-org/pronunciation-score-icelandic
+[submodule "frontend/captini-angular-frontend"]
+	path = frontend/captini-angular-frontend
+	url = https://github.com/captini-org/captini-angular-frontend.git
