@@ -76,10 +76,10 @@ services:
       - wavs:/app/recordings
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=PathPrefix(`/captini/`, `/admin/`, `/account/`, `/recordings/`)"
+      - "traefik.http.routers.backend.rule=PathPrefix(`/captini/`, `/admin/`, `/account/`, `/recordings/`, `/static/`)"
       - "traefik.http.routers.backend.entrypoints=websecure"
       - "traefik.http.routers.backend.tls.certresolver=tlsresolver"
-      - "traefik.http.routers.backend-dev.rule=PathPrefix(`/captini/`, `/admin/`, `/account/`, `/recordings/`)"
+      - "traefik.http.routers.backend-dev.rule=PathPrefix(`/captini/`, `/admin/`, `/account/`, `/recordings/`, `/static/`)"
       - "traefik.http.routers.backend-dev.entrypoints=web"
     restart: on-failure
 
