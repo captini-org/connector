@@ -1,6 +1,7 @@
 [submodule "backend/captini-django-backend"]
 	path = backend/captini-django-backend
 	url = https://github.com/captini-org/captini-django-backend
+	branch = main
 [submodule "modules/pronunciation/pronunciation-score-icelandic"]
 	path = modules/pronunciation/pronunciation-score-icelandic
 	url = https://github.com/captini-org/pronunciation-score-icelandic
