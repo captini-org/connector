@@ -7,7 +7,7 @@ COPY angular.json karma.conf.js package.json README.md tsconfig.app.json tsconfi
 RUN npm ci
 
 COPY . .
-RUN find src -name "*.ts" -exec sed -i "s_https://captini-backend.herokuapp.com_${ROOT_URL}_g" '{}' \;
+RUN find src -name "*.ts" -exec sed -i "s_https://captini-backend.herokuapp.com_${ROOT_URL}_g; s_http://127.0.0.1:8000_${ROOT_URL}_g" '{}' \;
 RUN npm run build
 
 FROM nginx:1.23.3 AS prod-runtime
