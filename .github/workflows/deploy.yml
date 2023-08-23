@@ -1,0 +1,39 @@
+name: Build and deploy Captini
+run-name: Deploying Captini for ${{ github.ref }} on ${{ github.event_name }}
+
+on:
+  push:
+    branches:
+    - master
+
+jobs:
+  docker-deploy-captini:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Connector repo
+      uses: actions/checkout@v3
+
+    - name: Configure SSH
+      env:
+        SSH_USER: ${{ secrets.SSH_USER }}
+        SSH_KEY: ${{ secrets.SSH_KEY }}
+        SSH_HOST: ${{ secrets.SSH_HOST }}
+      run: |
+        mkdir -p ~/.ssh
+        echo "$SSH_KEY" > ~/.ssh/deploy.key
+        chmod 600 ~/.ssh/deploy.key
+        cat <<END >> ~/.ssh/deploy.key
+        Host $SSH_HOST
+          HostName $SSH_HOST
+          User $SSH_USER
+          IdentityFile ~/.ssh/deploy.key
+          StrictHostKeyChecking no
+        END
+
+    - name: Deploy
+      env:
+        SSH_LOGIN: ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
+        DEPLOY_DIR: /srv/captini/connector
+      run: |
+        # Assumes initial clone was done manually
+        ssh "$SSH_LOGIN" cd $DEPLOY_DIR "git pull --recurse-submodules && docker-compose up -d --build"
