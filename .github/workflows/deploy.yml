@@ -22,7 +22,7 @@ jobs:
         mkdir -p ~/.ssh
         echo "$SSH_KEY" > ~/.ssh/deploy.key
         chmod 600 ~/.ssh/deploy.key
-        cat <<END >> ~/.ssh/config
+        cat >> ~/.ssh/config <<END
         Host $SSH_HOST
           HostName $SSH_HOST
           User $SSH_USER
@@ -36,4 +36,4 @@ jobs:
         DEPLOY_DIR: /srv/captini/connector
       run: |
         # Assumes initial clone was done manually
-        ssh "$SSH_LOGIN" cd $DEPLOY_DIR "git pull --recurse-submodules && docker-compose up -d --build"
+        ssh "$SSH_LOGIN" "cd $DEPLOY_DIR && git pull --recurse-submodules && docker-compose up -d --build"
