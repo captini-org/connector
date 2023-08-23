@@ -74,6 +74,8 @@ services:
       EMAIL_HOST_PASSWORD: "${EMAIL_HOST_PASSWORD}"
       EMAIL_HOST_USER: "${EMAIL_HOST_USER}"
       SENDGRID_API_KEY: "${SENDGRID_API_KEY}"
+      RESET_PASSWORD_LINK: "${RESET_PASSWORD_LINK}"
+      TEMPLATE_ID: "${TEMPLATE_ID}"
     volumes:
       - wavs:/app/recordings
     labels:
