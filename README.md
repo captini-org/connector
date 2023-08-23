@@ -19,3 +19,18 @@ You can also add the `-d` option to put the running Docker compose deployment
 into the background. Doing that allows you to repeatedly call `docker-compose up
 -d --build` to only modify and restart containers whose contents has changed.
 
+
+## Updating the submodules
+
+Once changes have been merged into the main or master branches of the submodules
+you need to update the references in this repo:
+
+```
+git submodule update --remote --merge
+```
+
+And add and commit (and push) the modified repo directories.
+
+## Deployment
+
+Each push to the master branch triggers a deployment to captini.tullius.dev.
