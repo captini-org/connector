@@ -22,7 +22,7 @@ jobs:
         mkdir -p ~/.ssh
         echo "$SSH_KEY" > ~/.ssh/deploy.key
         chmod 600 ~/.ssh/deploy.key
-        cat <<END >> ~/.ssh/deploy.key
+        cat <<END >> ~/.ssh/config
         Host $SSH_HOST
           HostName $SSH_HOST
           User $SSH_USER
