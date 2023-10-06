@@ -1,0 +1,56 @@
+diff --git a/docker-compose.yaml b/docker-compose.yaml
+index d573897..3d43437 100644
+--- a/docker-compose.yaml
++++ b/docker-compose.yaml
+@@ -72,10 +72,6 @@ services:
+       DATABASE_HOST: db
+       DATABASE_PASSWORD: django
+       EMAIL_HOST_PASSWORD: "${EMAIL_HOST_PASSWORD}"
+-      EMAIL_HOST_USER: "${EMAIL_HOST_USER}"
+-      SENDGRID_API_KEY: "${SENDGRID_API_KEY}"
+-      RESET_PASSWORD_LINK: "${RESET_PASSWORD_LINK}"
+-      TEMPLATE_ID: "${TEMPLATE_ID}"
+     volumes:
+       - wavs:/app/recordings
+     labels:
+@@ -90,15 +86,24 @@ services:
+   module-pronunciation:
+     build:
+       context: modules/pronunciation/pronunciation-score-icelandic
+-      dockerfile: ../Dockerfile
+-    command:
+-      - --wav-dir=/wavs/
++      dockerfile: Dockerfile
++      args:
++        - RECORDING=backend/captini-django-backend/recordings/exercisesAudio
++    depends_on:
++      - rabbitmq
+     volumes:
+       - pronunciation-cache:/cache
+       - wavs:/wavs
++      - './modules/pronunciation/pronunciation-score-icelandic:/app'
+     restart: on-failure
+ 
+   module-scoring:
+     build:
+       context: modules/scoring
++      dockerfile: Dockerfile
++      args:
++        - RECORDING=backend/captini-django-backend/recordings/exercisesAudio
++    depends_on:
++      - rabbitmq
+     restart: on-failure
++
+diff --git a/modules/scoring/connector.py b/modules/scoring/connector.py
+index 9626e23..d9ac709 100644
+--- a/modules/scoring/connector.py
++++ b/modules/scoring/connector.py
+@@ -99,7 +99,7 @@ def main():
+         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+     )
+     parser.add_argument("--rabbitmq-exchange", type=str, default="captini")
+-    parser.add_argument("--rabbitmq-host", type=str, default="rabbitmq")
++    parser.add_argument("--rabbitmq-host", type=str, default="connector_rabbitmq_1")
+     args = parser.parse_args()
+ 
+     producer = Producer(args)

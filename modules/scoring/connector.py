@@ -30,11 +30,11 @@ def json_serialize(obj):
 class Consumer:
     def __init__(self, args, callback):
         self._connection = pika.BlockingConnection(
-            pika.ConnectionParameters(host=args.rabbitmq_host)
+            pika.ConnectionParameters(host='connector_rabbitmq_1')
         )
         self._channel = self._connection.channel()
         self._channel.exchange_declare(
-            exchange=args.rabbitmq_exchange, exchange_type="direct"
+            exchange='captini', exchange_type="direct"
         )
 
         self._result = self._channel.queue_declare("", exclusive=True)
@@ -76,11 +76,11 @@ class Producer:
         # TODO(rkjaran): probably shouldn't have separate connections for consumer and
         #   producer. Who knows?
         self._connection = pika.BlockingConnection(
-            pika.ConnectionParameters(host=args.rabbitmq_host)
+            pika.ConnectionParameters(host='connector_rabbitmq_1')
         )
         self._channel = self._connection.channel()
         self._exchange = args.rabbitmq_exchange
-        self._channel.exchange_declare(exchange=self._exchange, exchange_type="direct")
+        self._channel.exchange_declare(exchange='captini', exchange_type="direct")
 
     def publish(self, message: dict, topic: OutputTopic) -> None:
         self._channel.basic_publish(
@@ -99,16 +99,13 @@ def main():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument("--rabbitmq-exchange", type=str, default="captini")
-    parser.add_argument("--rabbitmq-host", type=str, default="rabbitmq")
+    parser.add_argument("--rabbitmq-host", type=str, default="connector_rabbitmq_1")
     args = parser.parse_args()
-
-    producer = Producer(args)
-
     def callback(ch, method, properties, body) -> None:
         # TODO(rkjaran): Implement some kind of combining queue for waiting for multiple
         #   messages for a single output message.
         if (
-            method.routing_key == "PRONUNCIATION_ALIGNMENT"
+            method.routing_key == "SCORING_FEEDBACK"
         ):  # and also "PRONUNCIATION_SCORE" and "PROSODY_SCORE"
             msg = json.loads(body)
             session_id = msg.get("session_id", "UNKNOWN_SESSION")
@@ -125,7 +122,7 @@ def main():
                     "prosody": None,  # TODO(rkjaran): Get from PROSODY_SCORE
                     "alignment": msg["alignment"],
                 },
-                "SCORING_FEEDBACK",
+                "PRONUNCIATION_ALIGNMENT",
             )
 
     consumer = Consumer(args, callback=callback)
