@@ -2,9 +2,9 @@ import asyncio
 import websockets
 import json
 import asyncio
-import websockets
 import json
 import os
+import socket
 from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 WEB_SOCKET_HOST = os.environ['WEB_SOCKET_HOST']
@@ -27,6 +27,7 @@ async def server(websocket, path):
             for client in connected_clients:
                 await client.send(json.dumps(message))
     except websockets.exceptions.ConnectionClosed:
+        print("Connection closed")
         pass
     finally:
         # Remove the client from the list when they disconnect
@@ -37,7 +38,7 @@ dynamic_message = "Insaf"
 
 def start_server():
     # Start the WebSocket server
-    s_server = websockets.serve(server, WEB_SOCKET_HOST,WEB_SOCKET_PORT)
+    s_server = websockets.serve(server, WEB_SOCKET_HOST, WEB_SOCKET_PORT, family=socket.AF_INET)
     print('connected')
     print(s_server)
     # Run the event loop
