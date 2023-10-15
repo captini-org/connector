@@ -116,7 +116,7 @@ services:
   module-pronunciation:
     build:
       context: modules/pronunciation/pronunciation-score-icelandic
-      dockerfile: Dockerfile
+      dockerfile: ../Dockerfile
       args:
         - RECORDING= backend/captini-django-backend/recordings/exercisesAudio
     volumes:
