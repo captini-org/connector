@@ -13,6 +13,7 @@ from dotenv import load_dotenv, find_dotenv
 import asyncio
 import websockets
 import queue
+import logging
 load_dotenv(find_dotenv())
 # Define literals for topic names
 InputTopic = Literal[ "PRONUNCIATION_ALIGNMENT"]
@@ -102,38 +103,46 @@ def main():
     )
     parser.add_argument("--rabbitmq-exchange", type=str, default="captini")
     parser.add_argument("--rabbitmq-host", type=str, default="rabbitmq")
+    parser.add_argument("--log-level", choices=["DEBUG", "INFO", "WARNING", "ERROR"], default="DEBUG")
     args = parser.parse_args()
 
-    # Establish a connection to the PostgreSQL database
-    try:
-        conn = psycopg2.connect(
-            dbname='captini',
-            user='django',
-            password='django',
-            host='connector_db_1',
-            #port= '5432',
-        )
-        cursor = conn.cursor()
-    except Exception as e:
-        print(f'Error connecting to the database: {e}')
+    logging.basicConfig(level=args.log_level)
+
 
     # Define the callback function for processing messages
     def callback(ch, method, properties, body) -> None:
         try:
             response_data = json.loads(body)
+            logging.info("Handling message: %s", response_data)
             recording_id = response_data["recording_id"]
             score = response_data["score"]["task_feedback"]
             user_id = response_data["speaker_id"]
             task_id = response_data["text_id"]
             feedback = response_data["score"]
+
+            logging.info("Got here?: %s", response_data)
+
+
+            # Establish a connection to the PostgreSQL database
+            conn = psycopg2.connect(
+                dbname=os.environ["DATABASE_NAME"],
+                user=os.environ["DATABASE_USER"],
+                password=os.environ["DATABASE_PASSWORD"],
+                host=os.environ["DATABASE_HOST"],
+                port=os.environ["DATABASE_PORT"],
+            )
+
+            cursor = conn.cursor()
+
             # Update the UserTaskRecording with the received score in the database
             update_query = """
-                UPDATE captini_usertaskrecording captni_usertaskrecording
+                UPDATE captini_usertaskrecording
                 SET score = %s
                 WHERE id = %s
             """
             cursor.execute(update_query, (score, recording_id))
             conn.commit()
+
             # Update UserTaskScoreStats
             stats_query = """
                 INSERT INTO captini_usertaskscorestats (user_id, task_id, score_mean, number_tries)
@@ -157,6 +166,10 @@ def main():
             """
             cursor.execute(update_query, (user_id, user_id))
             conn.commit()
+
+            cursor.close()
+            conn.close()
+
             # Send the score data via WebSocket to the frontend
             score_data = {
             "user_id" :user_id,
@@ -169,9 +182,6 @@ def main():
             print(f'Error in consumeFromQueue callback: {e}')
     consumer = Consumer(args, callback=callback)
     consumer.start_consuming()
-    # Close the database connection when done
-    cursor.close()
-    conn.close()
 
 # Entry point of the script
 if __name__ == "__main__":
