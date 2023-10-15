@@ -32,7 +32,7 @@ class Consumer:
     def __init__(self, args, callback):
         # Establish a connection to RabbitMQ
         self._connection = pika.BlockingConnection(
-            pika.ConnectionParameters(host='connector_rabbitmq_1')
+            pika.ConnectionParameters(host=args.rabbitmq_host)
         )
         self._channel = self._connection.channel()
         self._channel.exchange_declare(
@@ -77,7 +77,7 @@ class Consumer:
 class Producer:
     def __init__(self, args):
         self._connection = pika.BlockingConnection(
-            pika.ConnectionParameters(host='connector_rabbitmq_1')
+            pika.ConnectionParameters(host=args.rabbitmq_host)
         )
         self._channel = self._connection.channel()
         self._exchange = args.rabbitmq_exchange
@@ -101,7 +101,7 @@ def main():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument("--rabbitmq-exchange", type=str, default="captini")
-    parser.add_argument("--rabbitmq-host", type=str, default="connector_rabbitmq_1")
+    parser.add_argument("--rabbitmq-host", type=str, default="rabbitmq")
     args = parser.parse_args()
 
     # Establish a connection to the PostgreSQL database
