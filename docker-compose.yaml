@@ -38,9 +38,9 @@ services:
     ports:
       - 6543:5432
     environment:
-      POSTGRES_PASSWORD: django
-      POSTGRES_USER: django
-      POSTGRES_DB: captini
+      POSTGRES_PASSWORD: "${DATABASE_PASSWORD}"
+      POSTGRES_USER: "${DATABASE_USER}"
+      POSTGRES_DB: "${DATABASE_NAME}"
     volumes:
       - db-data:/var/lib/postgresql/data
     restart: on-failure
@@ -50,7 +50,8 @@ services:
       context: frontend/captini-angular-frontend/frontEndCaptini
       dockerfile: ../../Dockerfile
       args:
-        ROOT_URL: ${ROOT_URL}
+        ROOT_URL: "${ROOT_URL}"
+        WEBSOCKET_URL: "${WEBSOCKET_URL}"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
@@ -67,15 +68,15 @@ services:
       - 8083:8000
     environment:
       SECRET_KEY: "${BACKEND_SECRET_KEY}"
-      DATABASE_NAME: captini
-      DATABASE_USER: django
-      DATABASE_HOST: db
-      DATABASE_PASSWORD: django
-      EMAIL_HOST_PASSWORD: "${EMAIL_HOST_PASSWORD}"
+      DATABASE_NAME: "${DATABASE_NAME}"
+      DATABASE_USER: "${DATABASE_USER}"
+      DATABASE_HOST: "${DATABASE_HOST}"
+      DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
       EMAIL_HOST_USER: "${EMAIL_HOST_USER}"
       SENDGRID_API_KEY: "${SENDGRID_API_KEY}"
-      RESET_PASSWORD_LINK: "${RESET_PASSWORD_LINK}"
       TEMPLATE_ID: "${TEMPLATE_ID}"
+      ROOT_URL: "${ROOT_URL}"
+      RABBITMQ_HOST: "${RABBITMQ_HOST:-rabbitmq}"
     volumes:
       - wavs:/app/recordings
     labels:
@@ -91,26 +92,37 @@ services:
     build:
       context: websocket-server
       dockerfile: Dockerfile
+    environment:
+      WEB_SOCKET_HOST: "${WEB_SOCKET_HOST}"
+      WEB_SOCKET_PORT: "${WEB_SOCKET_PORT}"
     ports:
       - 3000:3000
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.server.rule=PathPrefix(`/ws`)"
+      - "traefik.http.routers.server.entrypoints=websecure"
+      - "traefik.http.routers.server.tls.certresolver=tlsresolver"
+      - "traefik.http.routers.server-dev.rule=PathPrefix(`/ws`)"
+      - "traefik.http.routers.server-dev.entrypoints=web"
     restart: on-failure
+
   module-feedback:
     build:
       context: modules/feedback
       dockerfile: Dockerfile
       args:
-        - RECORDING= backend/captini-django-backend/recordings/exercisesAudio
+        - RECORDING=backend/captini-django-backend/recordings/exercisesAudio
     environment:
       SECRET_KEY: "${BACKEND_SECRET_KEY}"
-      DATABASE_NAME: captini
-      DATABASE_USER: django
-      DATABASE_HOST: db  # Use the same hostname as the "db" service
-      DATABASE_PASSWORD: django
-      EMAIL_HOST_PASSWORD: "${EMAIL_HOST_PASSWORD}"
+      DATABASE_NAME: "${DATABASE_NAME}"
+      DATABASE_USER: "${DATABASE_USER}"
+      DATABASE_HOST: "${DATABASE_HOST}"
+      DATABASE_PASSWORD: "${DATABASE_PASSWORD}"
+      DATABASE_PORT: "${DATABASE_PORT}"
       EMAIL_HOST_USER: "${EMAIL_HOST_USER}"
       SENDGRID_API_KEY: "${SENDGRID_API_KEY}"
-      RESET_PASSWORD_LINK: "${RESET_PASSWORD_LINK}"
       TEMPLATE_ID: "${TEMPLATE_ID}"
+      WEB_SOCKET: "${WEB_SOCKET}"
     restart: on-failure
     
   module-pronunciation:
@@ -118,11 +130,8 @@ services:
       context: modules/pronunciation/pronunciation-score-icelandic
       dockerfile: ../Dockerfile
       args:
-        - RECORDING= backend/captini-django-backend/recordings/exercisesAudio
+        - RECORDING=backend/captini-django-backend/recordings/exercisesAudio
     volumes:
       - pronunciation-cache:/cache
       - wavs:/wavs    
     restart: on-failure
-
-  
-
