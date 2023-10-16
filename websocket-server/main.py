@@ -33,14 +33,9 @@ async def server(websocket, path):
         # Remove the client from the list when they disconnect
         connected_clients.remove(websocket)
 
-# Your dynamic message here
-dynamic_message = "Insaf"
-
 def start_server():
     # Start the WebSocket server
     s_server = websockets.serve(server, WEB_SOCKET_HOST, WEB_SOCKET_PORT, family=socket.AF_INET)
-    print('connected')
-    print(s_server)
     # Run the event loop
     asyncio.get_event_loop().run_until_complete(s_server)
     asyncio.get_event_loop().run_forever()
